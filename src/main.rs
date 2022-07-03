@@ -3,8 +3,10 @@ mod color;
 mod canvas;
 mod math;
 mod scene;
-mod point;
 mod sphere;
+mod vec3;
+mod light;
+
 use macroquad::{prelude::*, window::Conf};
 
 fn window_conf() -> Conf {
@@ -18,7 +20,6 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-
 	let width = screen_width();
 	let height = screen_height();
 	let mut image = Image::gen_image_color(width as u16, height as u16, WHITE);
@@ -26,18 +27,27 @@ async fn main() {
 	ray_tracer::run(&mut image, width, height);
 	let texture = Texture2D::from_image(&image);
 
-	loop {
-        clear_background(BLACK);
-		
-		draw_texture(
-            texture,
-            screen_width() / 2. - texture.width() / 2.,
-            screen_height() / 2. - texture.height() / 2.,
-            WHITE,
-        );
-
-		let fps = format!("{}", get_fps());
-		draw_text(fps.as_str(), 30.0, 30.0, 30.0, BLACK);
+    loop {
+        draw_screen(texture);
+        draw_stats();
         next_frame().await
     }
+}
+
+fn draw_stats() {
+    let fps = format!("fps: {}", get_fps());
+    let frametime = format!("frame time: {}", get_frame_time());
+    draw_text(fps.as_str(), 10.0, 30.0, 24.0, BLACK);
+    draw_text(frametime.as_str(), 10.0, 50.0, 24.0, BLACK);
+}
+
+fn draw_screen(buffer: Texture2D) {
+    clear_background(BLACK);
+		
+    draw_texture(
+        buffer,
+        screen_width() / 2. - buffer.width() / 2.,
+        screen_height() / 2. - buffer.height() / 2.,
+        WHITE,
+    );
 }
