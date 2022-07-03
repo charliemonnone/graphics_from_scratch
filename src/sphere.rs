@@ -1,19 +1,35 @@
-use crate::{color::{Color, RED}, vec3::Point3};
+use crate::{
+    color::{Color, RED},
+    vec3::Point,
+};
 
 #[derive(Debug)]
 pub struct Sphere {
-	pub center: Point3,
-	pub radius: f32,
-	pub color: Color
+    pub center: Point,
+    pub radius: f32,
+    pub color: Color,
+	pub specular: f32
 }
 
 impl Default for Sphere {
-	/// Returns a red sphere at 0,0,0
-	fn default() -> Self { Self { center: Point3::default(), radius: 1.0, color: RED }}
+    /// Returns a red sphere at 0,0,0
+    fn default() -> Self {
+        Self {
+            center: Point::default(),
+            radius: 1.0,
+            color: RED,
+			specular: 10.0
+        }
+    }
 }
 
 impl Sphere {
-	pub fn new(center: Point3, radius: f32, color: Color) -> Self {
-		Self { center, radius, color }
-	}
+    pub fn new(center: Point, radius: f32, color: Color, specular: f32) -> Self {
+        Self {
+            center,
+            radius,
+            color,
+			specular
+        }
+    }
 }

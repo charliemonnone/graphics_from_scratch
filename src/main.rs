@@ -1,31 +1,31 @@
-mod ray_tracer;
-mod color;
 mod canvas;
+mod color;
+mod light;
 mod math;
+mod ray_tracer;
 mod scene;
 mod sphere;
 mod vec3;
-mod light;
 
 use macroquad::{prelude::*, window::Conf};
 
 fn window_conf() -> Conf {
     Conf {
         window_title: "Graphics From Scratch".to_owned(),
-		window_width: 800,
-		window_height: 640,
+        window_width: 800,
+        window_height: 640,
         ..Default::default()
     }
 }
 
 #[macroquad::main(window_conf)]
 async fn main() {
-	let width = screen_width();
-	let height = screen_height();
-	let mut image = Image::gen_image_color(width as u16, height as u16, WHITE);
+    let width = screen_width();
+    let height = screen_height();
+    let mut image = Image::gen_image_color(width as u16, height as u16, WHITE);
 
-	ray_tracer::run(&mut image, width, height);
-	let texture = Texture2D::from_image(&image);
+    ray_tracer::run(&mut image, width, height);
+    let texture = Texture2D::from_image(&image);
 
     loop {
         draw_screen(texture);
@@ -43,7 +43,7 @@ fn draw_stats() {
 
 fn draw_screen(buffer: Texture2D) {
     clear_background(BLACK);
-		
+
     draw_texture(
         buffer,
         screen_width() / 2. - buffer.width() / 2.,

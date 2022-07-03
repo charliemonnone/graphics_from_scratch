@@ -1,22 +1,19 @@
-pub use std::{f32::INFINITY};
-use std::{cmp::{min, max}};
 use crate::vec3::Vec3;
+use std::cmp::{max, min};
+pub use std::f32::INFINITY;
 
-pub fn sqrt(n: f32) -> f32 {
-	n.sqrt()
+pub fn sqrt_f32(n: f32) -> f32 {
+    n.sqrt()
 }
 
-pub fn clamp_u8(n: u8) -> u8  {
-	min(255, max(0, n))
-}
-
-pub fn clamp_f64(x: f64, min: f64, max: f64) -> f64 {
-	if x < min { return min;}
-    if x > max { return max;}
-    x
+pub fn clamp_u8(n: u8) -> u8 {
+    min(u8::max_value(), max(0, n))
 }
 
 pub fn vec_length(v: &Vec3<f32>) -> f32 {
-	sqrt(v.length_squared())
-	
+    sqrt_f32(v.length_squared())
+}
+
+pub fn pow(n: f32, p: f32) -> f32 {
+	n.powf(p)
 }
