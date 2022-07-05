@@ -2,7 +2,7 @@ use crate::{color::Color, math, scene::Scene, vec3::Point};
 use macroquad::prelude::Image;
 
 pub const VIEWPORT_SIZE: f32 = 1.0;
-pub const PROJECTION_PLANE_Z: f32 = 0.75;
+pub const PROJECTION_PLANE_Z: f32 = 0.50;
 pub const CAMERA_POSITION: Point = Point::new(0.0, 0.0, 0.0);
 
 pub fn run(image: &mut Image, width: f32, height: f32) {

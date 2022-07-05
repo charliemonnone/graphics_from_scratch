@@ -13,6 +13,8 @@ pub struct Scene {
     pub background_color: Color,
 }
 
+const EPISLON: f32 = 0.001;
+
 impl Scene {
     pub fn new(spheres: Vec<Sphere>, lights: Vec<LightSource>, bg: Color) -> Self {
         Self {
@@ -31,9 +33,9 @@ impl Scene {
         ];
 
         let lights = vec![
-            LightSource::new(LightType::Ambient, 0.5, None, None),
-            LightSource::new(LightType::Point, 0.4, Some(Vec3::new(2.0, 1.0, 0.0)), None),
-            LightSource::new(LightType::Directional, 0.1, None, Some(Vec3::new(1.0, 4.0, 4.0))),
+            LightSource::new(LightType::Ambient, 0.2, None, None),
+            LightSource::new(LightType::Point, 0.6, Some(Vec3::new(2.0, -1.0, 0.0)), None),
+            LightSource::new(LightType::Directional, 0.2, None, Some(Vec3::new(1.0, -4.0, 4.0))),
         ];
 
         let bg = Color::from_rgba(255, 255, 255, 255);
@@ -41,29 +43,16 @@ impl Scene {
         Scene::new(spheres, lights, bg)
     }
 
-    pub fn trace_ray(&self, origin: &Point, cam_dir: &Point, t_min: f32, t_max: f32) -> Color {
-        let mut closest_t = math::INFINITY;
-        let mut closest_sphere: Option<&Sphere> = None;
-        let spheres = &self.spheres;
-        for sphere in spheres {
-            let (t1, t2) = self.intersect_ray_sphere(origin, cam_dir, sphere);
-            let range = t_min..closest_t;
-            if range.contains(&t1) && t1 < t_max {
-                closest_t = t1;
-                closest_sphere = Some(sphere);
-            }
-            if range.contains(&t2) && t2 < t_max {
-                closest_t = t2;
-                closest_sphere = Some(sphere);
-            }
-        }
+    pub fn trace_ray(&self, origin: &Point, direction: &Point, t_min: f32, t_max: f32) -> Color {
+
+        let (closest_sphere, closest_t) = self.closest_intersection(origin, direction, t_min, t_max);
 
         match closest_sphere {
             Some(sphere) => {
-                let position = origin + &(cam_dir * closest_t); // intersection
+                let position = origin + &(direction * closest_t); // intersection
                 let mut normal = position - sphere.center;
                 normal = normal * (1.0 / math::vec_length(&normal));                 
-				let intensity = self.compute_lighting(&position, &normal, &neg(cam_dir), sphere.specular);
+				let intensity = self.compute_lighting(&position, &normal, &neg(direction), sphere.specular);
                 Color::new(
                     sphere.color.r * intensity,
                     sphere.color.g * intensity,
@@ -73,6 +62,26 @@ impl Scene {
             }
             None => self.background_color,
         }
+    }
+
+    fn closest_intersection(&self, origin: &Vec3<f32>, direction: &Vec3<f32>, t_min: f32, t_max: f32) -> (Option<&Sphere>, f32) {
+        let mut closest_t = math::INFINITY;
+        let mut closest_sphere: Option<&Sphere> = None; 
+        let spheres = &self.spheres;
+
+        for sphere in spheres {
+            let (t1, t2) = self.intersect_ray_sphere(origin, direction, sphere);
+            let range = t_min..t_max;
+            if range.contains(&t1) && t1 < closest_t {
+                closest_t = t1;
+                closest_sphere = Some(sphere);
+            }
+            if range.contains(&t2) && t2 < closest_t {
+                closest_t = t2;
+                closest_sphere = Some(sphere);
+            }
+        }
+        (closest_sphere, closest_t)
     }
 
     fn intersect_ray_sphere(&self, origin: &Point, direction: &Point, sphere: &Sphere) -> (f32, f32) {
@@ -94,22 +103,32 @@ impl Scene {
         }
     }
 
-    fn compute_lighting(&self, position: &Vec3<f32>, normal: &Vec3<f32>, cam_direction: &Vec3<f32>, specularity: f32) -> f32 {
+    fn compute_lighting(&self, position: &Vec3<f32>, normal: &Vec3<f32>, direction: &Vec3<f32>, specularity: f32) -> f32 {
         let mut intensity = 0.0;
         let mut l = None; 
+        let mut t_max = math::INFINITY;
         let lights = &self.lights;
+
         for light in lights {
             match light.light_type {
                 LightType::Ambient => intensity += light.intensity,
                 LightType::Point => {
                     let p = light.position.expect("Point light without position");
                     l = Some(&p - position);
+                    t_max = 1.0;
                 }
                 LightType::Directional => {
                     l = light.direction;
                 }
             }
             if let Some(l) = l {
+
+                // Shadow Check
+                let (shadow_sphere, _shadow_t) = self.closest_intersection(position, &l, EPISLON, t_max);
+                if shadow_sphere.is_some() {
+                    continue;
+                }
+
 				// Diffuse
                 let nl = dot(&normal, &l);
                 if nl > 0.0 {
@@ -121,10 +140,10 @@ impl Scene {
 				if specularity > -1.0 {
 					let r = (normal * 2.0) * nl ;
 					let r = r - l;
-					let rv = dot(&r, &cam_direction);
+					let rv = dot(&r, &direction);
 					if rv > 0.0 {
 						let r_len = vec_length(&r);
-						let cam_dir_len = vec_length(&cam_direction);
+						let cam_dir_len = vec_length(&direction);
 						intensity += light.intensity * math::pow(rv / (r_len * cam_dir_len), specularity);
 					}
 				}
