@@ -11,11 +11,12 @@ pub fn run(image: &mut Image, width: f32, height: f32) {
     let image_height = width;
     let width = width as i32;
     let height = height as i32;
+    let recursion_limit = 3;
 
     for y in -height / 2..height / 2 {
         for x in -width / 2..width / 2 {
             let direction = image_to_viewport(x as f32, y as f32, image_width, image_height);
-            let color = scene.trace_ray(&CAMERA_POSITION, &direction, 1.0, math::INFINITY);
+            let color = scene.trace_ray(&CAMERA_POSITION, &direction, 1.0, math::INFINITY, recursion_limit);
             let x_mapped = (x + (width / 2)) as u32;
             let y_mapped = (y + (height / 2)) as u32;
 

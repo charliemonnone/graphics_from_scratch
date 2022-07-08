@@ -4,7 +4,7 @@ use crate::{
     sphere::Sphere,
     vec3::{Point, Vec3, dot, neg},
 };
-use macroquad::prelude::Color;
+use macroquad::prelude::{Color, RED, BLUE, GREEN, YELLOW, BLACK};
 
 #[derive(Debug, Default)]
 pub struct Scene {
@@ -23,13 +23,16 @@ impl Scene {
             background_color: bg,
         }
     }
-
+    //  Color::from_rgba(255, 100, 120, 255), redish
+    //  Color::from_rgba(100, 150, 255, 255), bluish
+    //  Color::from_rgba(100, 255, 150, 255), greenish
+    //  Color::from_rgba(255, 200, 0, 255), yellowish
     pub fn test_scene() -> Self {
         let spheres = vec![
-            Sphere::new(Point::new(0.0, 1.0, 3.0), 1.0, Color::from_rgba(255, 100, 120, 255), 500.0),
-            Sphere::new(Point::new(2.0, 0.0, 4.0), 1.0, Color::from_rgba(100, 150, 255, 255), 500.0),
-            Sphere::new(Point::new(-2.0, 0.0, 4.0), 1.0, Color::from_rgba(100, 255, 150, 255), 10.0),
-            Sphere::new(Point::new(0.0, 5001.0, 0.0), 5000.0, Color::from_rgba(255, 200, 0, 255), 1000.0),
+            Sphere::new(Point::new(0.0, 1.0, 3.0), 1.0, Color::from_rgba(255, 0, 0, 255), 500.0, 0.2),
+            Sphere::new(Point::new(2.0, 0.0, 4.0), 1.0, Color::from_rgba(0, 0, 255, 255), 500.0, 0.3),
+            Sphere::new(Point::new(-2.0, 0.0, 4.0), 1.0, Color::from_rgba(0, 255, 0, 255), 10.0, 0.4),
+            Sphere::new(Point::new(0.0, 5001.0, 0.0), 5000.0, Color::from_rgba(255, 255, 0, 255), 1000.0, 0.5),
         ];
 
         let lights = vec![
@@ -38,12 +41,12 @@ impl Scene {
             LightSource::new(LightType::Directional, 0.2, None, Some(Vec3::new(1.0, -4.0, 4.0))),
         ];
 
-        let bg = Color::from_rgba(255, 255, 255, 255);
+        let bg = BLACK;
 
         Scene::new(spheres, lights, bg)
     }
 
-    pub fn trace_ray(&self, origin: &Point, direction: &Point, t_min: f32, t_max: f32) -> Color {
+    pub fn trace_ray(&self, origin: &Point, direction: &Point, t_min: f32, t_max: f32, recursion_depth: i32) -> Color {
 
         let (closest_sphere, closest_t) = self.closest_intersection(origin, direction, t_min, t_max);
 
@@ -53,11 +56,22 @@ impl Scene {
                 let mut normal = position - sphere.center;
                 normal = normal * (1.0 / math::vec_length(&normal));                 
 				let intensity = self.compute_lighting(&position, &normal, &neg(direction), sphere.specular);
+                let mut local_color = mul_color(&sphere.color, intensity);
+                let reflectivity = sphere.reflective;
+                if recursion_depth <= 0 || reflectivity <= 0.0 {
+                    return local_color
+                }
+
+                let ray = reflect_ray(&-direction, &normal);
+                let mut reflected_color = self.trace_ray(&position, &ray, t_min, t_max, recursion_depth - 1);
+                reflected_color = mul_color(&reflected_color, reflectivity);
+                local_color = mul_color(&local_color, 1.0 - reflectivity);
+                
                 Color::new(
-                    sphere.color.r * intensity,
-                    sphere.color.g * intensity,
-                    sphere.color.b * intensity,
-                    255.0,
+                    local_color.r + reflected_color.r, 
+                    local_color.g + reflected_color.g, 
+                    local_color.b + reflected_color.b, 
+                    255.0
                 )
             }
             None => self.background_color,
@@ -138,8 +152,7 @@ impl Scene {
 
 				// Specularity
 				if specularity > -1.0 {
-					let r = (normal * 2.0) * nl ;
-					let r = r - l;
+                    let r = reflect_ray(&l, &normal);
 					let rv = dot(&r, &direction);
 					if rv > 0.0 {
 						let r_len = vec_length(&r);
@@ -153,4 +166,19 @@ impl Scene {
 
         intensity
     }
+
+}
+
+/// reflect ray r with respect to the normal of the surface
+fn reflect_ray(r: &Vec3<f32>, n: &Vec3<f32>) -> Vec3<f32> {
+    &((n * 2.0) * dot(n, r)) - r
+}
+
+fn mul_color(color: &Color, n: f32) -> Color {
+    Color::new(
+        color.r * n,
+        color.g * n,
+        color.b * n,
+        1.0
+    )
 }

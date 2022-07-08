@@ -7,7 +7,7 @@ mod scene;
 mod sphere;
 mod vec3;
 
-use macroquad::{prelude::*, window::Conf, texture};
+use macroquad::{prelude::*, window::Conf};
 
 fn window_conf() -> Conf {
     Conf {
@@ -50,7 +50,7 @@ fn draw_stats() {
 }
 
 fn draw_screen(buffer: Texture2D) {
-    clear_background(WHITE);
+    // clear_background(BLACK);
     draw_texture(
         buffer,
         screen_width() / 2. - buffer.width() / 2.,
