@@ -6,6 +6,8 @@ mod ray_tracer;
 mod scene;
 mod sphere;
 mod vec3;
+mod camera;
+mod mat3;
 
 use macroquad::{prelude::*, window::Conf};
 

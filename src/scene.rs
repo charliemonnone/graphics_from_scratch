@@ -4,7 +4,8 @@ use crate::{
     sphere::Sphere,
     vec3::{Point, Vec3, dot, neg},
 };
-use macroquad::prelude::{Color, RED, BLUE, GREEN, YELLOW, BLACK};
+use crate::color::{RED, BLUE, GREEN, YELLOW, BLACK};
+use macroquad::prelude::{Color};
 
 #[derive(Debug, Default)]
 pub struct Scene {
@@ -23,16 +24,13 @@ impl Scene {
             background_color: bg,
         }
     }
-    //  Color::from_rgba(255, 100, 120, 255), redish
-    //  Color::from_rgba(100, 150, 255, 255), bluish
-    //  Color::from_rgba(100, 255, 150, 255), greenish
-    //  Color::from_rgba(255, 200, 0, 255), yellowish
+
     pub fn test_scene() -> Self {
         let spheres = vec![
-            Sphere::new(Point::new(0.0, 1.0, 3.0), 1.0, Color::from_rgba(255, 0, 0, 255), 500.0, 0.2),
-            Sphere::new(Point::new(2.0, 0.0, 4.0), 1.0, Color::from_rgba(0, 0, 255, 255), 500.0, 0.3),
-            Sphere::new(Point::new(-2.0, 0.0, 4.0), 1.0, Color::from_rgba(0, 255, 0, 255), 10.0, 0.4),
-            Sphere::new(Point::new(0.0, 5001.0, 0.0), 5000.0, Color::from_rgba(255, 255, 0, 255), 1000.0, 0.5),
+            Sphere::new(Point::new(0.0, 1.0, 3.0), 1.0, RED, 500.0, 0.2),
+            Sphere::new(Point::new(2.0, 0.0, 4.0), 1.0, BLUE, 500.0, 0.3),
+            Sphere::new(Point::new(-2.0, 0.0, 4.0), 1.0, GREEN, 10.0, 0.4),
+            Sphere::new(Point::new(0.0, 5001.0, 0.0), 5000.0, YELLOW, 1000.0, 0.5),
         ];
 
         let lights = vec![

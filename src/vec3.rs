@@ -1,13 +1,38 @@
-use std::{ops::{Add, AddAssign, Div, Mul, MulAssign, Rem, Sub, SubAssign, Neg}};
+use std::{ops::{Add, AddAssign, Div, Mul, MulAssign, Rem, Sub, SubAssign, Neg, Index, IndexMut}};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Vec3<T> {
     pub v0: T,
     pub v1: T,
     pub v2: T,
+	sentintel: T
 }
 
 pub type Point = Vec3<f32>;
+
+impl<T: VecData> Index<usize> for Vec3<T> {
+	type Output = T;
+	fn index(&self, i: usize) -> &Self::Output {
+		match i {
+			0 => &self.v0,
+			1 => &self.v1,
+			2 => &self.v2,
+			_ => &self.sentintel
+		}
+	}
+}
+
+impl<T: VecData> IndexMut<usize> for Vec3<T> {
+	fn index_mut(&mut self, i: usize) -> &mut T {
+		
+		match i {
+			0 => &mut self.v0,
+			1 => &mut self.v1,
+			2 => &mut self.v2,
+			_ => &mut self.sentintel
+		}
+	}
+}
 
 // Trait bound "alias" hack
 // https://www.worthe-it.co.za/blog/2017-01-15-aliasing-traits-in-rust.html
@@ -24,6 +49,7 @@ pub trait VecData:
     + Copy
     + PartialEq
     + PartialOrd
+	+ Default
 where
     Self: std::marker::Sized, {}
 
@@ -39,7 +65,8 @@ impl<T> VecData for T where
         + MulAssign
         + Copy
         + PartialEq
-        + PartialOrd {}
+        + PartialOrd 
+		+ Default {}
 
 /*
     impl operations will mutate self when applicable
@@ -48,8 +75,8 @@ impl<T> VecData for T where
 */
 impl<T> Vec3<T>
 where T: VecData {
-    pub const fn new(v0: T, v1: T, v2: T) -> Self {
-        Self { v0, v1, v2 }
+    pub fn new(v0: T, v1: T, v2: T) -> Self {
+        Self { v0, v1, v2, sentintel: T::default() }
     }
 
     pub fn sub(&mut self, other: &Self) {

@@ -1,9 +1,8 @@
-use crate::{color::Color, math, scene::Scene, vec3::Point};
+use crate::{color::Color, math, scene::Scene, vec3::{Point}, camera::{Camera}, mat3::Mat3};
 use macroquad::prelude::Image;
 
 pub const VIEWPORT_SIZE: f32 = 1.0;
 pub const PROJECTION_PLANE_Z: f32 = 0.50;
-pub const CAMERA_POSITION: Point = Point::new(0.0, 0.0, 0.0);
 
 pub fn run(image: &mut Image, width: f32, height: f32) {
     let scene = Scene::test_scene();
@@ -13,20 +12,32 @@ pub fn run(image: &mut Image, width: f32, height: f32) {
     let height = height as i32;
     let recursion_limit = 3;
 
+    let camera = Camera::new(
+        Point::new(3.0, 0.0, 1.0), 
+        Mat3::new(vec![0.7071, 0.0, -0.7071, 0.0, 1.0, 0.0, 0.7071, 0.0, 0.7071])
+    );
+
     for y in -height / 2..height / 2 {
         for x in -width / 2..width / 2 {
             let direction = image_to_viewport(x as f32, y as f32, image_width, image_height);
-            let color = scene.trace_ray(&CAMERA_POSITION, &direction, 1.0, math::INFINITY, recursion_limit);
-            let x_mapped = (x + (width / 2)) as u32;
-            let y_mapped = (y + (height / 2)) as u32;
+            let direction = camera.rotation.mul_vec3(&direction);
+            let color = scene.trace_ray(&camera.position, &direction, 1.0, math::INFINITY, recursion_limit);
 
+            let (x_mapped, y_mapped) = map_to_pixels(x, y, width, height);
             put_pixel(image, x_mapped, y_mapped, color);
         }
     }
 }
 
 fn put_pixel(image: &mut Image, x: u32, y: u32, color: Color) {
+
     image.set_pixel(x, y, color);
+}
+
+fn map_to_pixels(x: i32, y: i32, width: i32, height: i32 ) -> (u32, u32) {
+    let x_mapped = (x + (width / 2)) as u32;
+    let y_mapped = (y + (height / 2)) as u32;
+    (x_mapped, y_mapped)
 }
 
 fn image_to_viewport(x: f32, y: f32, image_width: f32, image_height: f32) -> Point {
