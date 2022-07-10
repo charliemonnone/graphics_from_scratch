@@ -1,4 +1,4 @@
-pub mod ray_tracer;
+pub mod render;
 mod camera;
 mod canvas;
 mod color;
@@ -8,13 +8,3 @@ mod math;
 mod scene;
 mod sphere;
 mod vec3;
-
-// use camera;
-// use canvas;
-// use color;
-// use light;
-// use mat3;
-// use math;
-// use scene;
-// use sphere;
-// use vec3;
