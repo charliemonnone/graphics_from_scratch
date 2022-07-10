@@ -1,5 +1,4 @@
-use crate::{vec3::{Point}, mat3::Mat3};
-
+use super::{vec3::{Point}, mat3::Mat3};
 
 #[derive(Default, Debug, Clone)]
 pub struct Camera {

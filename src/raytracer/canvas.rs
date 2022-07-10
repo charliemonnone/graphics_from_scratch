@@ -1,5 +1,4 @@
-use crate::color::Color24;
-use crate::vec3::Point;
+use crate::raytracer::{color::Color24, vec3::Point};
 
 #[derive(Debug)]
 pub struct Canvas {

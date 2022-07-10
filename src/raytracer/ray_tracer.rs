@@ -1,4 +1,12 @@
-use crate::{color::{Color, self}, math, scene::{Scene}, vec3::{Point}, camera::{Camera}, mat3::Mat3};
+use crate::raytracer::{
+    color::{Color, self}, 
+    math, 
+    scene::{Scene}, 
+    vec3::{Point}, 
+    camera::{Camera}, 
+    mat3::Mat3
+};
+
 use macroquad::prelude::Image;
 
 pub const VIEWPORT_SIZE: f32 = 1.0;

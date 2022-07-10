@@ -1,10 +1,11 @@
-use crate::{
+use crate::raytracer::{
     light::{LightSource, LightType},
     math::{self, vec_length},
     sphere::Sphere,
     vec3::{Point, Vec3, dot, neg},
+    color::{RED, BLUE, GREEN, YELLOW, BLACK}
 };
-use crate::color::{RED, BLUE, GREEN, YELLOW, BLACK};
+
 use macroquad::prelude::{Color};
 
 #[derive(Debug, Default)]

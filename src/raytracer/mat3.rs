@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::vec3::Vec3;
+use crate::raytracer::vec3::Vec3;
 #[derive(Debug, Default, Clone)]
 /// 3x3 matrix
 pub struct Mat3 {

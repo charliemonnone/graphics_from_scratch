@@ -1,15 +1,6 @@
-mod canvas;
-mod color;
-mod light;
-mod math;
-mod ray_tracer;
-mod scene;
-mod sphere;
-mod vec3;
-mod camera;
-mod mat3;
-
+mod raytracer;
 use macroquad::{prelude::*, window::Conf};
+use raytracer::ray_tracer;
 
 fn window_conf() -> Conf {
     Conf {
@@ -20,11 +11,15 @@ fn window_conf() -> Conf {
     }
 }
 
-#[macroquad::main(window_conf)]
-async fn main() {
-    let mut width = screen_width();
-    let mut height = screen_height();
-    let mut resize_texture = false;
+enum Program {
+	RayTracer,
+	Rasterizer
+}
+
+async fn raytracer(init_width: f32, init_height: f32) {
+    let mut width = init_width;
+    let mut height = init_height;
+	let mut resize_texture = false;
     let mut texture = render_scene(width, height);
 
     loop {
@@ -42,6 +37,26 @@ async fn main() {
         draw_stats();
         next_frame().await
     }
+}
+
+async fn rasterizer(init_width: f32, init_height: f32) {
+
+}
+
+#[macroquad::main(window_conf)]
+async fn main() {
+    let width = screen_width();
+    let height = screen_height();
+	let program = Program::RayTracer;
+
+	match program {
+		Program::RayTracer => raytracer(width, height).await,
+		Program::Rasterizer => rasterizer(width, height).await,
+
+	}
+
+
+
 }
 
 fn draw_stats() {

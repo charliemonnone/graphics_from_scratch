@@ -1,4 +1,4 @@
-use crate::{
+use crate::raytracer::{
     color::{Color, RED},
     vec3::Point,
 };

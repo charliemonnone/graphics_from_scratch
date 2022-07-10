@@ -1,4 +1,4 @@
-use crate::vec3::Vec3;
+use super::vec3::Vec3;
 use std::cmp::{ max, min };
 pub use std::f32::INFINITY;
 pub use nalgebra as na;
