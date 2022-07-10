@@ -13,7 +13,6 @@ pub struct Scene {
     pub lights: Vec<LightSource>,
     pub background_color: Color,
 }
-
 const EPISLON: f32 = 0.001;
 
 impl Scene {
@@ -44,17 +43,20 @@ impl Scene {
         Scene::new(spheres, lights, bg)
     }
 
-    pub fn trace_ray(&self, origin: &Point, direction: &Point, t_min: f32, t_max: f32, recursion_depth: i32) -> Color {
+    pub fn trace_ray(&mut self, origin: &Point, direction: &Vec3<f32>, t_min: f32, t_max: f32, recursion_depth: i32) -> Color {
 
         let (closest_sphere, closest_t) = self.closest_intersection(origin, direction, t_min, t_max);
 
         match closest_sphere {
             Some(sphere) => {
                 let position = origin + &(direction * closest_t); // intersection
+
                 let mut normal = position - sphere.center;
-                normal = normal * (1.0 / math::vec_length(&normal));                 
+                normal = normal * (1.0 / math::vec_length(&normal));            
+
 				let intensity = self.compute_lighting(&position, &normal, &neg(direction), sphere.specular);
                 let mut local_color = mul_color(&sphere.color, intensity);
+
                 let reflectivity = sphere.reflective;
                 if recursion_depth <= 0 || reflectivity <= 0.0 {
                     return local_color
@@ -80,9 +82,10 @@ impl Scene {
         let mut closest_t = math::INFINITY;
         let mut closest_sphere: Option<&Sphere> = None; 
         let spheres = &self.spheres;
+        let dir_dot = dot(&direction, &direction);
 
-        for sphere in spheres {
-            let (t1, t2) = self.intersect_ray_sphere(origin, direction, sphere);
+        for (_i, sphere) in spheres.iter().enumerate() {
+            let (t1, t2) = self.intersect_ray_sphere(origin, direction, sphere, dir_dot);
             let range = t_min..t_max;
             if range.contains(&t1) && t1 < closest_t {
                 closest_t = t1;
@@ -96,13 +99,15 @@ impl Scene {
         (closest_sphere, closest_t)
     }
 
-    fn intersect_ray_sphere(&self, origin: &Point, direction: &Point, sphere: &Sphere) -> (f32, f32) {
-        let radius = sphere.radius;
+    
+
+    fn intersect_ray_sphere(&self, origin: &Point, direction: &Point, sphere: &Sphere, dir_dot: f32) -> (f32, f32) {
+        let radius_sq = sphere.radius_sq;
         let oc = origin - &sphere.center;
 
-        let a = dot(&direction, &direction);
+        let a = dir_dot;
         let b = 2.0 * dot(&oc, &direction);
-        let c = dot(&oc, &oc) - radius * radius;
+        let c = dot(&oc, &oc) - radius_sq;
         let discriminant = b * b - 4.0 * a * c;
 
         if discriminant < 0.0 {
@@ -136,8 +141,8 @@ impl Scene {
             if let Some(l) = l {
 
                 // Shadow Check
-                let (shadow_sphere, _shadow_t) = self.closest_intersection(position, &l, EPISLON, t_max);
-                if shadow_sphere.is_some() {
+                let (hit_sphere, _shadow_t) = self.closest_intersection(position, &l, EPISLON, t_max);
+                if hit_sphere.is_some() {
                     continue;
                 }
 

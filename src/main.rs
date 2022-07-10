@@ -47,8 +47,8 @@ async fn main() {
 fn draw_stats() {
     let fps = format!("fps: {}", get_fps());
     let frametime = format!("frame time: {}", get_frame_time());
-    draw_text(fps.as_str(), screen_width() * 0.01, screen_height() * 0.03, 24.0, BLACK);
-    draw_text(frametime.as_str(), screen_width() * 0.01, (screen_height() * 0.03)+20.0, 24.0, BLACK);
+    draw_text(fps.as_str(), screen_width() * 0.01, screen_height() * 0.03, 24.0, WHITE);
+    draw_text(frametime.as_str(), screen_width() * 0.01, (screen_height() * 0.03)+20.0, 24.0, WHITE);
 }
 
 fn draw_screen(buffer: Texture2D) {

@@ -7,6 +7,7 @@ use crate::{
 pub struct Sphere {
     pub center: Point,
     pub radius: f32,
+    pub radius_sq: f32,
     pub color: Color,
 	pub specular: f32,
     pub reflective: f32
@@ -18,6 +19,7 @@ impl Default for Sphere {
         Self {
             center: Point::default(),
             radius: 1.0,
+            radius_sq: 1.0 * 1.0,
             color: RED,
 			specular: 10.0,
             reflective: 0.5
@@ -30,6 +32,7 @@ impl Sphere {
         Self {
             center,
             radius,
+            radius_sq: radius * radius,
             color,
 			specular,
             reflective
