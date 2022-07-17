@@ -139,6 +139,7 @@ version = "0.1.0"
 dependencies = [
  "macroquad",
  "nalgebra",
+ "once_cell",
 ]
 
 [[package]]
@@ -366,6 +367,12 @@ checksum = "13e571c3517af9e1729d4c63571a27edd660ade0667973bfc74a67c660c2b651"
 dependencies = [
  "byteorder",
 ]
+
+[[package]]
+name = "once_cell"
+version = "1.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "18a6dbe30758c9f83eb00cbea4ac95966305f5a7772f3f42ebfc7fc7eddbd8e1"
 
 [[package]]
 name = "paste"

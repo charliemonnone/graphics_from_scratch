@@ -7,7 +7,7 @@ fn window_conf() -> Conf {
     Conf {
         window_title: "Graphics From Scratch".to_owned(),
         window_width: 800,
-        window_height: 640,
+        window_height: 800,
         ..Default::default()
     }
 }
@@ -104,6 +104,6 @@ fn render_raytracer_scene(width: f32, height: f32) -> Texture2D {
 
 fn render_rasterizer_scene(width: f32, height: f32) -> Texture2D {
     let mut image = Image::gen_image_color(width as u16, height as u16, WHITE);
-    rasterizer::render::run(&mut image, width, height);
+    rasterizer::main::run(&mut image, width, height);
     Texture2D::from_image(&image)
 }
