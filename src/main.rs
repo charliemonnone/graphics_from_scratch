@@ -7,7 +7,7 @@ fn window_conf() -> Conf {
     Conf {
         window_title: "Graphics From Scratch".to_owned(),
         window_width: 800,
-        window_height: 800,
+        window_height: 640,
         ..Default::default()
     }
 }
@@ -24,6 +24,7 @@ async fn rt(init_width: f32, init_height: f32) {
     let mut texture = render_raytracer_scene(width, height);
 
     loop {
+
         if width != screen_width() || height != screen_height() {
             resize_texture = !resize_texture;
         }
@@ -47,6 +48,10 @@ async fn rast(init_width: f32, init_height: f32) {
 
     let mut texture = render_rasterizer_scene(width, height);
     loop {
+        clear_background(BLACK);
+        if is_key_pressed(KeyCode::Escape) {
+            return;
+        }
         if width != screen_width() || height != screen_height() {
             resize_texture = !resize_texture;
         }

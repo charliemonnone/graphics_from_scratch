@@ -21,7 +21,6 @@ impl Default for Camera {
 			pos: Position::default(),
 			view_height: 1.0,
 			view_width: 1.0,
-			// ..Default::default()
 		}
 
 	}
