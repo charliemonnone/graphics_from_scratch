@@ -1,4 +1,4 @@
-use super::{camera::Camera, vertex::Vertex, point2::Point2, main::get_canvas_dimensions};
+use super::{camera::Camera, data_types::Vertex, data_types::Point2, main::get_canvas_dimensions};
 use macroquad::color::Color;
 
 pub fn interpolate(i0: i32, d0: f32, i1: i32, d1: f32) -> Vec<f32> {
@@ -38,4 +38,19 @@ pub fn viewport_to_canvas(cam: &Camera, x: f32, y: f32) -> Point2 {
 
 pub fn project_vertex(cam: &Camera, v: &Vertex) -> Point2 {
 	viewport_to_canvas(cam, v.x * cam.viewport_dist / v.z, v.y * cam.viewport_dist / v.z)
+}
+
+pub mod math {
+	use std::f32::INFINITY;
+	use std::i32;
+	use std::f32;
+
+	pub const INF: f32 = INFINITY;
+	pub fn abs(n: i32) -> i32 {
+		n.abs()
+	}
+
+	pub fn floor_f(n: f32) -> f32 {
+		n.floor()
+	}
 }

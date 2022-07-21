@@ -1,5 +1,5 @@
 use std::mem::swap;
-use super::{point2::Point2, math, utils, main::get_canvas_dimensions, vertex::Vertex, shapes::Triangle, camera::Camera};
+use super::{data_types::Point2, utils, main::get_canvas_dimensions, data_types::Vertex, data_types::Triangle, camera::Camera};
 use macroquad::{texture::Image, color::Color};
 
 pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
@@ -14,7 +14,7 @@ pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
 	let dx = x1 - x0;
 	let dy = y1 - y0;
 	
-	if math::abs(dx) > math::abs(dy) {
+	if utils::math::abs(dx) > utils::math::abs(dy) {
 		// horizontalish
 		if x0 > x1 { 
 			swap(&mut p0, &mut p1); 
@@ -127,7 +127,7 @@ fn shade_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, color: 
 	let h_right;
 
 	let mid = (x02.len() / 2) as f32;
-	let mid = math::floor_f(mid) as usize;
+	let mid = utils::math::floor_f(mid) as usize;
 
 	if x02[mid] < x012[mid] {
 		x_left = &x02;

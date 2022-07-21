@@ -1,10 +1,9 @@
 pub mod main;
-mod math;
 mod camera;
 mod vec3;
-mod point2;
-mod vertex;
 mod render;
 mod utils;
 mod shapes;
 mod scene;
+mod constants;
+mod data_types;

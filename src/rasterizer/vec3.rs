@@ -1,6 +1,6 @@
 use std::{ops::{Add, AddAssign, Div, Mul, MulAssign, Rem, Sub, SubAssign, Neg, Index, IndexMut}};
 
-use super::math;
+use super::utils::math;
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Vec3 {
     pub v0: f32,

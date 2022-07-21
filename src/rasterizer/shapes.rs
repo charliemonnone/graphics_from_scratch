@@ -1,43 +1,27 @@
-use macroquad::prelude::{Color, RED, GREEN, BLUE, YELLOW, PURPLE};
+use super::{constants::*, vec3::Position};
+use super::data_types::{Triangle, Vertex};
 
-use super::{vertex::Vertex, vec3::Position};
+// pub enum ModelType {
+// 	Cube
+// }
 
-const CYAN: Color = Color::new(0., 1., 1., 1.);
+// pub struct ModelInstance {
+// 	model: ModelType,
+// 	position: Position
+// }
 
-#[derive(Debug, Default, Copy, Clone)]
-pub struct Triangle {
-	pub v0: u32,
-	pub v1: u32,
-	pub v2: u32,
-	pub color: Color
-}
-
-impl Triangle {
-	const fn new(v0: u32, v1: u32, v2: u32, color: Color) -> Self {
-		Self { v0, v1, v2, color }
-	}
-}
-
-pub enum ModelType {
-	Cube
-}
-
-pub struct ModelInstance {
-	model: ModelType,
-	position: Position
-}
-
-impl ModelInstance {
-
-}
+// impl ModelInstance {
+// 
+// }
 
 #[derive(Debug, Default, Clone)]
 pub struct Cube {
 	pub triangles: [Triangle; 12],
 	pub verticies: [Vertex; 8]
 }
+
 impl Cube {
-	const fn debug_cube() -> Self {
+	pub const fn debug_cube() -> Self {
 		Self { 
 			triangles: [
 				Triangle::new(0, 1, 2, RED),
@@ -67,4 +51,3 @@ impl Cube {
 	}
 }
 
-pub static CUBE: Cube = Cube::debug_cube();

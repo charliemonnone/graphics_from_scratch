@@ -1,5 +1,5 @@
-use super::{point2::Point2, vertex::Vertex, camera::Camera, vec3::Position, render, utils, shapes};
-use macroquad::prelude::{Image, BLACK, RED, BLUE, YELLOW, ORANGE, PURPLE, GREEN, WHITE, Color};
+use super::{data_types::Point2, data_types::Vertex, camera::Camera, vec3::Position, render, utils, shapes, constants::*};
+use macroquad::prelude::{Image};
 use once_cell::sync::Lazy;
 use std::{sync::{RwLock}};
 
@@ -64,7 +64,7 @@ fn test_scene(image: &mut Image) {
 
 fn cube_scene(image: &mut Image) {
 	let camera = Camera::new(Position::default(), 1.0, 1.0, 1.0);
-	let mut cube = shapes::CUBE.clone();
+	let mut cube = CUBE.clone();
 	let translation = vec![-1.5, 0., 7.];
 	// translate cube verts to not be inside camera
 	for v in &mut cube.verticies {
