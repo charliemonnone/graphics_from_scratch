@@ -1,5 +1,5 @@
 use std::mem::swap;
-use super::{data_types::Point2, utils, main::get_canvas_dimensions, data_types::Vertex, data_types::Triangle, camera::Camera};
+use super::{data_types::Point2, utils, main::get_canvas_dimensions, data_types::{Vertex, Instance}, data_types::Triangle, camera::Camera};
 use macroquad::{texture::Image, color::Color};
 
 pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
@@ -48,29 +48,7 @@ pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
 	}
 }
 
-/// Given upper left point p0, a width and height, draw a rectangle
-pub fn draw_rect(image: &mut Image, p0: Point2, width: i32, height: i32, color: Color, fill: Option<Color>) {
-	
-	let p1 = Point2::new(p0.x + width, p0.y, p0.h); 
-	let p2 = Point2::new(p1.x, p0.y + height, p0.h); 
-	let p3 = Point2::new(p0.x, p2.y, p0.h); 
-	// p0 --- p1
-	// |	  |
-	// |	  |
-	// p3 --- p2
-
-	if let Some(fill_color) = fill {
-		fill_rect(image, p0, width, height, fill_color)
-	}
-
-	draw_line(image, p0, p1, color);
-	draw_line(image, p1, p2, color);
-	draw_line(image, p3, p2, color);
-	draw_line(image, p0, p3, color);
-
-}
-
-pub fn draw_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, stroke: Option<Color>, fill: Option<Color>) {
+fn draw_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, stroke: Option<Color>, fill: Option<Color>) {
 	if let Some(fill_color) = fill {
 		shade_triangle(image, p0, p1, p2, fill_color);
 	}
@@ -79,18 +57,6 @@ pub fn draw_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, stro
 		draw_line(image, p0, p1, stroke_color);
 		draw_line(image, p1, p2, stroke_color);
 		draw_line(image, p2, p0, stroke_color);
-	}
-}
-
-fn fill_rect(image: &mut Image, p0: Point2, width: i32, height: i32, color: Color) {
-	let x0 = p0.x;
-	let x1 = x0 + width;
-	let y0 = p0.y;
-	let y1 = y0 + height;
-	for y in y0..=y1 {
-		for x in x0..=x1 {
-			put_pixel(image, x, y, color);
-		}
 	}
 }
 
@@ -167,19 +133,24 @@ fn render_triangle(image: &mut Image, triangle: &Triangle, projected: &Vec<Point
 	draw_triangle(image, p0, p1, p2, stroke, fill)
 }
 
-pub fn render_shape(image: &mut Image, cam: &Camera, verticies: &[Vertex], triangles: &[Triangle]) {
-	let mut projected: Vec<Point2> = vec![];
-	for v in verticies {
-		projected.push(utils::project_vertex(cam, v));
-	}
-
-	for t in triangles {
-		render_triangle(image, t, &projected);
+pub fn render_scene(image: &mut Image, cam: &Camera, instances: &Vec<Instance>) {
+	for i in instances {
+		render_instance(image, cam, i)
 	}
 }
 
-pub fn render_scene() {
+pub fn render_instance(image: &mut Image, cam: &Camera, instance: &Instance) {
+	let mut projected: Vec<Point2> = vec![];
+	let model = instance.model;
 	
+	for v in &model.verticies {
+		let p = &Vertex::from(&instance.position); 
+		projected.push(utils::project_vertex(cam, &(v + p)))
+	}
+
+	for t in &model.triangles {
+		render_triangle(image, t, &projected)
+	}
 }
 
 fn put_pixel(image: &mut Image, x: i32, y: i32, color: Color) {
