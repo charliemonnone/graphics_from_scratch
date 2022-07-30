@@ -1,5 +1,5 @@
 use std::mem::swap;
-use super::{data_types::Point2, utils, main::get_canvas_dimensions, data_types::{Vertex, Instance}, data_types::Triangle, camera::Camera};
+use super::{data_types::Point2, utils, main::get_canvas_dimensions, data_types::{Vertex, Instance}, data_types::{Triangle, Model, Mat4x4, Vertex4}, camera::Camera};
 use macroquad::{texture::Image, color::Color};
 
 pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
@@ -134,18 +134,21 @@ fn render_triangle(image: &mut Image, triangle: &Triangle, projected: &Vec<Point
 }
 
 pub fn render_scene(image: &mut Image, cam: &Camera, instances: &Vec<Instance>) {
+	let camera_mat = utils::mul_mm(cam.orientation.transpose(), utils::make_translation_mat(cam.pos * -1.));
+
 	for i in instances {
-		render_instance(image, cam, i)
+		let transform = utils::mul_mm(camera_mat, i.transform);
+		render_model(image, cam, i.model, transform);
 	}
 }
 
-pub fn render_instance(image: &mut Image, cam: &Camera, instance: &Instance) {
+pub fn render_model(image: &mut Image, cam: &Camera, model: &Model, transform: Mat4x4) {
 	let mut projected: Vec<Point2> = vec![];
-	let model = instance.model;
-	
 	for v in &model.verticies {
-		let p = &Vertex::from(&instance.position); 
-		projected.push(utils::project_vertex(cam, &(v + p)))
+		let v = Vertex4::new(v.x, v.y, v.z, 1.);
+		let v4 = utils::mul_mv(transform, v);
+
+		projected.push(utils::project_vertex(cam, v4));
 	}
 
 	for t in &model.triangles {
@@ -156,6 +159,12 @@ pub fn render_instance(image: &mut Image, cam: &Camera, instance: &Instance) {
 fn put_pixel(image: &mut Image, x: i32, y: i32, color: Color) {
 	let (width, height) = get_canvas_dimensions();
 
+	// let buf_len = (width * height) as i32;
+	// let index = (y * width as i32) + x;
+	// println!("{index}");
+	// if index >= buf_len { return; }
+
 	let (x_mapped, y_mapped) = utils::map_to_pixels(x, y, width as i32, height as i32);
-    image.set_pixel(x_mapped, y_mapped, color);
+	if x_mapped >= width as u32 || y_mapped >= height as u32 { return; }
+	image.set_pixel(x_mapped, y_mapped, color);
 }

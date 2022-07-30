@@ -6,8 +6,8 @@ mod rasterizer;
 fn window_conf() -> Conf {
     Conf {
         window_title: "Graphics From Scratch".to_owned(),
-        window_width: 800,
-        window_height: 640,
+        window_width: 600,
+        window_height: 600,
         ..Default::default()
     }
 }

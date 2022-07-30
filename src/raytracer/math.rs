@@ -1,7 +1,6 @@
 use super::vec3::Vec3;
 use std::cmp::{ max, min };
 pub use std::f32::INFINITY;
-pub use nalgebra as na;
 
 pub fn sqrt_f32(n: f32) -> f32 {
     n.sqrt()

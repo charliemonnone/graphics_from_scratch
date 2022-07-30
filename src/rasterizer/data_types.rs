@@ -1,8 +1,8 @@
 use std::{ops::{Add, Mul}, process::Output};
-
+use glam::{mat4, vec4};
 use macroquad::prelude::Color;
 
-use super::{vec3::{Position, Vec3}, constants::*};
+use super::{vec3::{Position, Vec3}, constants::*, utils};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Vertex {
@@ -16,6 +16,9 @@ impl Vertex {
 		Self {x, y, z}
 	}
 	
+	pub fn translate(self, other: Self) -> Self {
+		self + other
+	}
 }
 
 impl From<&Vec3> for Vertex {
@@ -32,6 +35,13 @@ impl Add for Vertex {
 	}
 }
 
+impl Add<&Vec3> for Vertex {
+	type Output = Self;
+	fn add(self, other: &Vec3) -> Self::Output {
+		Vertex::new(self.x + other.v0, self.y + other.v1, self.z + other.v2)
+	}
+}
+
 impl Add for &Vertex {
 	type Output = Vertex;
 	fn add(self, other: Self) -> Self::Output {
@@ -41,6 +51,13 @@ impl Add for &Vertex {
 
 impl Mul<f32> for Vertex {
 	type Output = Self;
+	fn mul(self, k: f32) -> Self::Output {
+		Vertex::new(self.x * k, self.y * k, self.z * k)
+	}
+}
+
+impl Mul<f32> for &Vertex {
+	type Output = Vertex;
 	fn mul(self, k: f32) -> Self::Output {
 		Vertex::new(self.x * k, self.y * k, self.z * k)
 	}
@@ -116,6 +133,7 @@ impl Cube {
 	}
 }
 
+#[derive(Debug)]
 pub struct Model {
 	pub triangles: Vec<Triangle>,
 	pub verticies: Vec<Vertex>
@@ -127,16 +145,60 @@ impl From<&Cube> for Model {
 	}
 }
 
+#[derive(Debug)]
 pub struct Instance<'a> {
 	pub model: &'a Model,
-	pub position: Position
+	pub position: Position,
+	pub orientation: Mat4x4,
+	pub scale: f32,
+	pub transform: Mat4x4
 }
 
 impl<'a> Instance<'a> {
-	pub fn new(model: &'a Model, position: Position) -> Self {
+	pub fn new(model: &'a Model, position: Position, orientation: Option<Mat4x4>, scale: Option<f32>) -> Self {
+		let mut s = 1.;
+		let o;
+		if let Some(scale) = scale {
+			s = scale;
+		}
+
+		if let Some(orientation) = orientation {
+			o = orientation;
+		} else {
+			o = IDEN_4X4.clone();
+		}
+		let t_mat = utils::make_translation_mat(position);//.transpose();
+		let s_mat = utils::mul_mm(o, utils::make_scaling_mat(s));
+		// println!("t row1: {}", t_mat.row(0));
+		// println!("t row2: {}", t_mat.row(1));
+		// println!("t row3: {}", t_mat.row(2));
+		// println!("t row4: {}", t_mat.row(3));
+		// println!("");
+		// println!("s row1: {}", s_mat.row(0));
+		// println!("s row2: {}", s_mat.row(1));
+		// println!("s row3: {}", s_mat.row(2));
+		// println!("s row4: {}", s_mat.row(3));
+		// println!("");
+		let transform = utils::mul_mm(t_mat, s_mat);//.transpose();
+
 		Self {
 			model,
-			position
+			position,
+			transform,
+			orientation: o,
+			scale: s,
 		}
 	}
 }
+
+
+pub type Point3 = glam::Vec3;
+pub type Vertex4 = glam::Vec4;
+pub type Vec4 = glam::Vec4;
+pub type Mat4x4 = glam::Mat4;
+pub const IDEN_4X4: Mat4x4 = glam::const_mat4!(
+    [1.0, 0.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0, 0.0],
+    [0.0, 0.0, 1.0, 0.0],
+    [0.0, 0.0, 0.0, 1.0]
+);
