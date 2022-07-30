@@ -1,8 +1,8 @@
 use std::mem::swap;
-use super::{data_types::Point2, utils, main::get_canvas_dimensions, data_types::{Vertex, Instance}, data_types::{Triangle, Model, Mat4x4, Vertex4}, camera::Camera};
+use super::{data_types::Point, utils, main::get_canvas_dimensions, data_types::{Instance}, data_types::{Triangle, Model, Mat4x4, Vertex4}, camera::Camera};
 use macroquad::{texture::Image, color::Color};
 
-pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
+pub fn draw_line(image: &mut Image, p0: Point, p1: Point, color: Color) {
 	let mut p0 = p0;
 	let mut p1 = p1;
 
@@ -24,8 +24,10 @@ pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
 			y1 = p1.y;
 		}
 		let ys = utils::interpolate(x0, y0 as f32, x1, y1 as f32);
-		for x in x0..=x1 {
-			let index: usize = (x - x0) as usize;
+		let start = x0 as i32;
+		let end = x1 as i32;
+		for x in start..=end {
+			let index: usize = (x as f32 - x0) as usize;
 			let y = ys[index];
 			put_pixel(image, x, y as i32, color);
 		}
@@ -39,16 +41,17 @@ pub fn draw_line(image: &mut Image, p0: Point2, p1: Point2, color: Color) {
 			y1 = p1.y;
 		}
 		let xs = utils::interpolate(y0, x0 as f32, y1, x1 as f32);
-
-		for y in y0..=y1 {
-			let index: usize = (y - y0) as usize;
+		let start = y0 as i32;
+		let end = y1 as i32;
+		for y in start..=end {
+			let index: usize = (y as f32 - y0) as usize;
 			let x = xs[index];
 			put_pixel(image, x as i32, y, color);
 		}
 	}
 }
 
-fn draw_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, stroke: Option<Color>, fill: Option<Color>) {
+fn draw_triangle(image: &mut Image, p0: Point, p1: Point, p2: Point, stroke: Option<Color>, fill: Option<Color>) {
 	if let Some(fill_color) = fill {
 		shade_triangle(image, p0, p1, p2, fill_color);
 	}
@@ -60,7 +63,7 @@ fn draw_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, stroke: 
 	}
 }
 
-fn shade_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, color: Color) {
+fn shade_triangle(image: &mut Image, p0: Point, p1: Point, p2: Point, color: Color) {
 	let mut p0 = p0;
 	let mut p1 = p1;
 	let mut p2 = p2;
@@ -68,9 +71,9 @@ fn shade_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, color: 
 	if p2.y < p0.y { swap(&mut p2, &mut p0)} 
 	if p2.y < p1.y { swap(&mut p2, &mut p1)} 
 
-	let h0 = p0.h;
-	let h1 = p1.h;
-	let h2 = p2.h;
+	let h0 = p0.z;
+	let h1 = p1.z;
+	let h2 = p2.z;
 
 	let mut x01 = utils::interpolate(p0.y, p0.x as f32, p1.y, p1.x as f32);
 	let mut h01 = utils::interpolate(p0.y, h0, p1.y, h1);
@@ -107,13 +110,14 @@ fn shade_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, color: 
 		h_right = &h02;
 	}
 
-	let y0 = p0.y;
-	let y2 = p2.y;
-	for y in y0..=y2 {
-		let y_idx = (y - y0) as usize;
+	let start = p0.y as i32;
+	let end = p2.y as i32;
+
+	for y in start..=end {
+		let y_idx = (y - start) as usize;
 		let xl = x_left[y_idx] as i32;
 		let xr = x_right[y_idx] as i32;
-		let h_segment = utils::interpolate(xl, h_left[y_idx], xr, h_right[y_idx]);
+		let h_segment = utils::interpolate(xl as f32, h_left[y_idx], xr as f32, h_right[y_idx]);
 		for x in xl..=xr {
 			let x_idx = (x - xl) as usize;
 			let h = h_segment[x_idx];
@@ -124,7 +128,7 @@ fn shade_triangle(image: &mut Image, p0: Point2, p1: Point2, p2: Point2, color: 
 	
 }
 
-fn render_triangle(image: &mut Image, triangle: &Triangle, projected: &Vec<Point2>) {
+fn render_triangle(image: &mut Image, triangle: &Triangle, projected: &Vec<Point>) {
 	let p0 = projected[triangle.v0 as usize];
 	let p1 = projected[triangle.v1 as usize];
 	let p2 = projected[triangle.v2 as usize];
@@ -143,11 +147,11 @@ pub fn render_scene(image: &mut Image, cam: &Camera, instances: &Vec<Instance>) 
 }
 
 pub fn render_model(image: &mut Image, cam: &Camera, model: &Model, transform: Mat4x4) {
-	let mut projected: Vec<Point2> = vec![];
+	let mut projected: Vec<Point> = vec![];
+
 	for v in &model.verticies {
 		let v = Vertex4::new(v.x, v.y, v.z, 1.);
 		let v4 = utils::mul_mv(transform, v);
-
 		projected.push(utils::project_vertex(cam, v4));
 	}
 
@@ -158,13 +162,9 @@ pub fn render_model(image: &mut Image, cam: &Camera, model: &Model, transform: M
 
 fn put_pixel(image: &mut Image, x: i32, y: i32, color: Color) {
 	let (width, height) = get_canvas_dimensions();
-
-	// let buf_len = (width * height) as i32;
-	// let index = (y * width as i32) + x;
-	// println!("{index}");
-	// if index >= buf_len { return; }
-
 	let (x_mapped, y_mapped) = utils::map_to_pixels(x, y, width as i32, height as i32);
+
 	if x_mapped >= width as u32 || y_mapped >= height as u32 { return; }
+
 	image.set_pixel(x_mapped, y_mapped, color);
 }
