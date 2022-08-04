@@ -1,35 +1,41 @@
-use super::{ data_types::{Mat4x4, Vertex3}};
+use super::{data_types::{Mat4x4, Vertex3, Plane}, utils::math};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Camera {
-	pub pos: Vertex3,
-	pub orientation: Mat4x4,
-	pub viewport_dist: f32,
-	pub view_width: f32,
-	pub view_height: f32,
+    pub pos: Vertex3,
+    pub orientation: Mat4x4,
+    pub clipping_planes: [Plane; 5]
+}
+
+fn clipping_planes(s2: f32) -> [Plane; 5] {
+    [
+        Plane::new(Vertex3::new(0., 0., 1.), -1.), // near
+        Plane::new(Vertex3::new(s2, 0., s2), 0.),   // left
+        Plane::new(Vertex3::new(-s2, 0., s2), 0.),  // right
+        Plane::new(Vertex3::new(0., -s2, s2), 0.),  // top
+        Plane::new(Vertex3::new(0., s2, s2), 0.),   // bottom
+    ]
 }
 
 impl Camera {
-	pub fn new(pos: Vertex3, orientation: Mat4x4, viewport_dist: f32, view_width: f32, view_height: f32) -> Self {
-		Self { 
-			pos, 
-			orientation, 
-			viewport_dist, 
-			view_width, 
-			view_height 
-		}
-	}
+    pub fn new(pos: Vertex3, orientation: Mat4x4) -> Self {
+        let s2 = math::sqrt_f(2.);
+        Self {
+            pos,
+            orientation,
+            clipping_planes: clipping_planes(s2)
+        }
+    }
 }
 
 impl Default for Camera {
-	fn default() -> Self {
-		Self {
-			pos: Vertex3::default(),
-			orientation: Mat4x4::default(),
-			viewport_dist: 1.0,
-			view_height: 1.0,
-			view_width: 1.0,
-		}
+    fn default() -> Self {
+        let s2 = math::sqrt_f(2.);
+        Self {
+            pos: Vertex3::default(),
+            orientation: Mat4x4::default(),
+            clipping_planes: clipping_planes(s2)
 
-	}
+        }
+    }
 }

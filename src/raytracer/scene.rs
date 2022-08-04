@@ -1,12 +1,12 @@
 use crate::raytracer::{
+    color::{BLACK, BLUE, GREEN, RED, YELLOW},
     light::{LightSource, LightType},
     math::{self, vec_length},
     sphere::Sphere,
-    vec3::{Point, Vec3, dot, neg},
-    color::{RED, BLUE, GREEN, YELLOW, BLACK}
+    vec3::{dot, neg, Point, Vec3},
 };
 
-use macroquad::prelude::{Color};
+use macroquad::prelude::Color;
 
 #[derive(Debug, Default)]
 pub struct Scene {
@@ -36,7 +36,12 @@ impl Scene {
         let lights = vec![
             LightSource::new(LightType::Ambient, 0.2, None, None),
             LightSource::new(LightType::Point, 0.6, Some(Vec3::new(2.0, -1.0, 0.0)), None),
-            LightSource::new(LightType::Directional, 0.2, None, Some(Vec3::new(1.0, -4.0, 4.0))),
+            LightSource::new(
+                LightType::Directional,
+                0.2,
+                None,
+                Some(Vec3::new(1.0, -4.0, 4.0)),
+            ),
         ];
 
         let bg = BLACK;
@@ -44,44 +49,59 @@ impl Scene {
         Scene::new(spheres, lights, bg)
     }
 
-    pub fn trace_ray(&mut self, origin: &Point, direction: &Vec3<f32>, t_min: f32, t_max: f32, recursion_depth: i32) -> Color {
-
-        let (closest_sphere, closest_t) = self.closest_intersection(origin, direction, t_min, t_max);
+    pub fn trace_ray(
+        &mut self,
+        origin: &Point,
+        direction: &Vec3<f32>,
+        t_min: f32,
+        t_max: f32,
+        recursion_depth: i32,
+    ) -> Color {
+        let (closest_sphere, closest_t) =
+            self.closest_intersection(origin, direction, t_min, t_max);
 
         match closest_sphere {
             Some(sphere) => {
                 let position = origin + &(direction * closest_t); // intersection
 
                 let mut normal = position - sphere.center;
-                normal = normal * (1.0 / math::vec_length(&normal));            
+                normal = normal * (1.0 / math::vec_length(&normal));
 
-				let intensity = self.compute_lighting(&position, &normal, &neg(direction), sphere.specular);
+                let intensity =
+                    self.compute_lighting(&position, &normal, &neg(direction), sphere.specular);
                 let mut local_color = mul_color(&sphere.color, intensity);
 
                 let reflectivity = sphere.reflective;
                 if recursion_depth <= 0 || reflectivity <= 0.0 {
-                    return local_color
+                    return local_color;
                 }
 
                 let ray = reflect_ray(&-direction, &normal);
-                let mut reflected_color = self.trace_ray(&position, &ray, t_min, t_max, recursion_depth - 1);
+                let mut reflected_color =
+                    self.trace_ray(&position, &ray, t_min, t_max, recursion_depth - 1);
                 reflected_color = mul_color(&reflected_color, reflectivity);
                 local_color = mul_color(&local_color, 1.0 - reflectivity);
-                
+
                 Color::new(
-                    local_color.r + reflected_color.r, 
-                    local_color.g + reflected_color.g, 
-                    local_color.b + reflected_color.b, 
-                    255.0
+                    local_color.r + reflected_color.r,
+                    local_color.g + reflected_color.g,
+                    local_color.b + reflected_color.b,
+                    255.0,
                 )
             }
             None => self.background_color,
         }
     }
 
-    fn closest_intersection(&self, origin: &Vec3<f32>, direction: &Vec3<f32>, t_min: f32, t_max: f32) -> (Option<&Sphere>, f32) {
+    fn closest_intersection(
+        &self,
+        origin: &Vec3<f32>,
+        direction: &Vec3<f32>,
+        t_min: f32,
+        t_max: f32,
+    ) -> (Option<&Sphere>, f32) {
         let mut closest_t = math::INFINITY;
-        let mut closest_sphere: Option<&Sphere> = None; 
+        let mut closest_sphere: Option<&Sphere> = None;
         let spheres = &self.spheres;
         let dir_dot = dot(&direction, &direction);
 
@@ -100,9 +120,13 @@ impl Scene {
         (closest_sphere, closest_t)
     }
 
-    
-
-    fn intersect_ray_sphere(&self, origin: &Point, direction: &Point, sphere: &Sphere, dir_dot: f32) -> (f32, f32) {
+    fn intersect_ray_sphere(
+        &self,
+        origin: &Point,
+        direction: &Point,
+        sphere: &Sphere,
+        dir_dot: f32,
+    ) -> (f32, f32) {
         let radius_sq = sphere.radius_sq;
         let oc = origin - &sphere.center;
 
@@ -121,9 +145,15 @@ impl Scene {
         }
     }
 
-    fn compute_lighting(&self, position: &Vec3<f32>, normal: &Vec3<f32>, direction: &Vec3<f32>, specularity: f32) -> f32 {
+    fn compute_lighting(
+        &self,
+        position: &Vec3<f32>,
+        normal: &Vec3<f32>,
+        direction: &Vec3<f32>,
+        specularity: f32,
+    ) -> f32 {
         let mut intensity = 0.0;
-        let mut l = None; 
+        let mut l = None;
         let mut t_max = math::INFINITY;
         let lights = &self.lights;
 
@@ -140,37 +170,36 @@ impl Scene {
                 }
             }
             if let Some(l) = l {
-
                 // Shadow Check
-                let (hit_sphere, _shadow_t) = self.closest_intersection(position, &l, EPISLON, t_max);
+                let (hit_sphere, _shadow_t) =
+                    self.closest_intersection(position, &l, EPISLON, t_max);
                 if hit_sphere.is_some() {
                     continue;
                 }
 
-				// Diffuse
+                // Diffuse
                 let nl = dot(&normal, &l);
                 if nl > 0.0 {
                     intensity +=
                         light.intensity * nl / (math::vec_length(&normal) * math::vec_length(&l))
                 }
 
-				// Specularity
-				if specularity > -1.0 {
+                // Specularity
+                if specularity > -1.0 {
                     let r = reflect_ray(&l, &normal);
-					let rv = dot(&r, &direction);
-					if rv > 0.0 {
-						let r_len = vec_length(&r);
-						let cam_dir_len = vec_length(&direction);
-						intensity += light.intensity * math::pow(rv / (r_len * cam_dir_len), specularity);
-					}
-				}
+                    let rv = dot(&r, &direction);
+                    if rv > 0.0 {
+                        let r_len = vec_length(&r);
+                        let cam_dir_len = vec_length(&direction);
+                        intensity +=
+                            light.intensity * math::pow(rv / (r_len * cam_dir_len), specularity);
+                    }
+                }
             }
-
         }
 
         intensity
     }
-
 }
 
 /// reflect ray r with respect to the normal of the surface
@@ -179,10 +208,5 @@ fn reflect_ray(r: &Vec3<f32>, n: &Vec3<f32>) -> Vec3<f32> {
 }
 
 fn mul_color(color: &Color, n: f32) -> Color {
-    Color::new(
-        color.r * n,
-        color.g * n,
-        color.b * n,
-        1.0
-    )
+    Color::new(color.r * n, color.g * n, color.b * n, 1.0)
 }

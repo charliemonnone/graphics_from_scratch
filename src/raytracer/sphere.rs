@@ -9,8 +9,8 @@ pub struct Sphere {
     pub radius: f32,
     pub radius_sq: f32,
     pub color: Color,
-	pub specular: f32,
-    pub reflective: f32
+    pub specular: f32,
+    pub reflective: f32,
 }
 
 impl Default for Sphere {
@@ -21,8 +21,8 @@ impl Default for Sphere {
             radius: 1.0,
             radius_sq: 1.0 * 1.0,
             color: RED,
-			specular: 10.0,
-            reflective: 0.5
+            specular: 10.0,
+            reflective: 0.5,
         }
     }
 }
@@ -34,8 +34,8 @@ impl Sphere {
             radius,
             radius_sq: radius * radius,
             color,
-			specular,
-            reflective
+            specular,
+            reflective,
         }
     }
 }

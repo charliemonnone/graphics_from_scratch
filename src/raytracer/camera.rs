@@ -1,16 +1,16 @@
-use super::{vec3::{Point}, mat3::Mat3};
+use super::{mat3::Mat3, vec3::Point};
 
 #[derive(Default, Debug, Clone)]
 pub struct Camera {
-	pub position: Point,
-	pub rotation: Mat3
+    pub position: Point,
+    pub rotation: Mat3,
 }
 
 impl Camera {
-	pub fn new(p: Point, r: Mat3) -> Camera {
-		Camera {
-			position: p,
-			rotation: r
-		}
-	}
+    pub fn new(p: Point, r: Mat3) -> Camera {
+        Camera {
+            position: p,
+            rotation: r,
+        }
+    }
 }

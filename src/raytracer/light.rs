@@ -16,7 +16,12 @@ pub struct LightSource {
 }
 
 impl LightSource {
-    pub fn new(light_type: LightType, intensity: f32, position: Option<Vec3<f32>>, direction: Option<Vec3<f32>>) -> Self {
+    pub fn new(
+        light_type: LightType,
+        intensity: f32,
+        position: Option<Vec3<f32>>,
+        direction: Option<Vec3<f32>>,
+    ) -> Self {
         LightSource {
             light_type,
             intensity,

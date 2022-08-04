@@ -1,7 +1,7 @@
 use macroquad::{prelude::*, window::Conf};
 
-mod raytracer;
 mod rasterizer;
+mod raytracer;
 
 fn window_conf() -> Conf {
     Conf {
@@ -13,18 +13,17 @@ fn window_conf() -> Conf {
 }
 
 enum Program {
-	RayTracer,
-	Rasterizer
+    RayTracer,
+    Rasterizer,
 }
 
 async fn rt(init_width: f32, init_height: f32) {
     let mut width = init_width;
     let mut height = init_height;
-	let mut resize_texture = false;
+    let mut resize_texture = false;
     let mut texture = render_raytracer_scene(width, height, BLACK);
 
     loop {
-
         if width != screen_width() || height != screen_height() {
             resize_texture = !resize_texture;
         }
@@ -44,7 +43,7 @@ async fn rt(init_width: f32, init_height: f32) {
 async fn rast(init_width: f32, init_height: f32) {
     let mut width = init_width;
     let mut height = init_height;
-	let mut resize_texture = false;
+    let mut resize_texture = false;
 
     let mut texture = render_rasterizer_scene(width, height, BLACK);
     loop {
@@ -73,22 +72,31 @@ async fn rast(init_width: f32, init_height: f32) {
 async fn main() {
     let width = screen_width();
     let height = screen_height();
-	let program = Program::Rasterizer;
-    
-    
+    let program = Program::Rasterizer;
+
     match program {
-		Program::RayTracer => rt(width, height).await,
-		Program::Rasterizer => rast(width, height).await,
-
-	}
-
+        Program::RayTracer => rt(width, height).await,
+        Program::Rasterizer => rast(width, height).await,
+    }
 }
 
 fn draw_stats(color: Color) {
     let fps = format!("fps: {}", get_fps());
     let frametime = format!("frame time: {}", get_frame_time());
-    draw_text(fps.as_str(), screen_width() * 0.01, screen_height() * 0.03, 24.0, color);
-    draw_text(frametime.as_str(), screen_width() * 0.01, (screen_height() * 0.03)+20.0, 24.0, color);
+    draw_text(
+        fps.as_str(),
+        screen_width() * 0.01,
+        screen_height() * 0.03,
+        24.0,
+        color,
+    );
+    draw_text(
+        frametime.as_str(),
+        screen_width() * 0.01,
+        (screen_height() * 0.03) + 20.0,
+        24.0,
+        color,
+    );
 }
 
 fn draw_screen(buffer: Texture2D, color: Color) {

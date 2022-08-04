@@ -1,5 +1,5 @@
 use super::vec3::Vec3;
-use std::cmp::{ max, min };
+use std::cmp::{max, min};
 pub use std::f32::INFINITY;
 
 pub fn sqrt_f32(n: f32) -> f32 {
@@ -15,5 +15,5 @@ pub fn vec_length(v: &Vec3<f32>) -> f32 {
 }
 
 pub fn pow(n: f32, p: f32) -> f32 {
-	n.powf(p)
+    n.powf(p)
 }
