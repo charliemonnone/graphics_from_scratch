@@ -117,6 +117,8 @@ fn render_raytracer_scene(width: f32, height: f32, fill_color: Color) -> Texture
 
 fn render_rasterizer_scene(width: f32, height: f32, fill_color: Color) -> Texture2D {
     let mut image = Image::gen_image_color(width as u16, height as u16, fill_color);
+    let width = image.width();
+    let height = image.height();
     rasterizer::main::run(&mut image, width, height);
     Texture2D::from_image(&image)
 }

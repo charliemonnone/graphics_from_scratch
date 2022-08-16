@@ -16,15 +16,13 @@ pub const IDEN_4X4: Mat4x4 = glam::const_mat4!(
 
 #[derive(Debug, Default, Copy, Clone)]
 pub struct Triangle {
-    pub v0: u32,
-    pub v1: u32,
-    pub v2: u32,
+    pub ind: [usize; 3],
     pub color: Color,
 }
 
 impl Triangle {
-    pub const fn new(v0: u32, v1: u32, v2: u32, color: Color) -> Self {
-        Self { v0, v1, v2, color }
+    pub const fn new(v0: usize, v1: usize, v2: usize, color: Color) -> Self {
+        Self { ind: [v0, v1, v2,], color }
     }
 }
 
@@ -40,16 +38,16 @@ impl Cube {
             triangles: [
                 Triangle::new(0, 1, 2, RED),
                 Triangle::new(0, 2, 3, RED),
-                Triangle::new(4, 0, 3, GREEN),
-                Triangle::new(4, 3, 7, GREEN),
-                Triangle::new(5, 4, 7, BLUE),
-                Triangle::new(5, 7, 6, BLUE),
                 Triangle::new(1, 5, 6, YELLOW),
                 Triangle::new(1, 6, 2, YELLOW),
-                Triangle::new(4, 5, 1, PURPLE),
-                Triangle::new(4, 1, 0, PURPLE),
                 Triangle::new(2, 6, 7, CYAN),
                 Triangle::new(2, 7, 3, CYAN),
+                Triangle::new(4, 0, 3, GREEN),
+                Triangle::new(4, 1, 0, PURPLE),
+                Triangle::new(4, 3, 7, GREEN),
+                Triangle::new(4, 5, 1, PURPLE),
+                Triangle::new(5, 4, 7, BLUE),
+                Triangle::new(5, 7, 6, BLUE),
             ],
             verticies: [
                 Vertex3::new(1., 1., 1.),
