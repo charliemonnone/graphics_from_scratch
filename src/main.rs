@@ -79,7 +79,7 @@ async fn main() {
         Program::Rasterizer => rast(width, height).await,
     }
 }
-
+// test commit from deckos
 fn draw_stats(color: Color) {
     let fps = format!("fps: {}", get_fps());
     let frametime = format!("frame time: {}", get_frame_time());
